@@ -1,0 +1,24 @@
+# Copy to terraform.tfvars (git-ignored) and adjust locally — NEVER commit the
+# real file. Keep these in sync with ../../../.env.example.
+
+# --- Credentials & models (set these) ---
+project_name        = "villageos"
+postgres_db         = "villageos"
+postgres_user       = "village"
+postgres_password   = "village"
+minio_root_user     = "village"
+minio_root_password = "villagepassword"
+llm_chat_model      = "llama3.2"
+llm_embedding_model = "nomic-embed-text"
+
+# --- Fixed constants — have defaults; override only intentionally ---
+# network_name       = "villageos-network"
+# minio_bucket       = "proofs"
+# app_port           = 3000
+# minio_api_port     = 9000
+# minio_console_port = 9001
+# ollama_port        = 11434
+# postgres_port      = 5432
+# redis_port         = 6379
+# app_image          = "node:20-alpine"
+# retain_volumes     = false

@@ -1,0 +1,35 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# testing / coverage
+/coverage
+
+# env / secrets — only *.example is tracked
+.env
+.env*.local
+*.tfvars
+!*.tfvars.example
+terraform.tfstate*
+.terraform/
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# build info
+*.tsbuildinfo
+
+# scratch photos at repo root (kept out of the repo by default)
+/*.jpg
+/*.jpeg

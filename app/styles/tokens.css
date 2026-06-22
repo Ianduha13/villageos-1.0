@@ -1,0 +1,68 @@
+/*
+ * VillageOS design tokens — harvested from the 12 Barra da Lagoa mockups.
+ * Dark navy surfaces, a green→teal→blue brand gradient, neon glassmorphism.
+ * pt-BR-first consumer "arena operating system".
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Surfaces (dark app screens 5–12). */
+  --bg-base: #0a1420;
+  --bg-deep: #06101c;
+  --surface: rgba(14, 34, 51, 0.72); /* #0E2233 @ ~72%, backdrop-blur cards */
+  --surface-2: rgba(14, 34, 51, 0.5);
+  --hairline: rgba(30, 51, 70, 0.55); /* #1E3346 @ ~55% */
+
+  /* Brand gradient — every primary CTA, FAB, progress bar, place-name. */
+  --brand-green: #3be38b;
+  --brand-teal: #26d6c2;
+  --brand-blue: #2f7cf0;
+
+  /* Feature accents. */
+  --accent-cyan: #36d5e0; /* pins, "Você", links, active tab */
+  --accent-green: #3be38b; /* success / verified / online / offers */
+  --accent-purple: #8b5cf6; /* Infinitos ∞, Conector, events, projects */
+  --accent-amber: #f5a623; /* missions, "Em validação", warnings */
+  --accent-red: #f0476a; /* needs, debits, "Contestar", alerts */
+
+  /* Text. */
+  --text-primary: #f4f8fb;
+  --text-secondary: #9fb1c2;
+
+  /* Glow. */
+  --glow-cyan: rgba(54, 213, 224, 0.35);
+  --glow-purple: rgba(166, 107, 255, 0.4);
+
+  /* Type. */
+  --font-sans: "Inter", "Poppins", -apple-system, "SF Pro", sans-serif;
+}
+
+html,
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reusable surface primitives the shell + cards lean on. */
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(20px);
+}
+
+.brand-gradient-text {
+  background: linear-gradient(
+    90deg,
+    var(--brand-green),
+    var(--brand-teal),
+    var(--brand-blue)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

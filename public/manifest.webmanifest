@@ -1,0 +1,19 @@
+{
+  "name": "VillageOS — Barra da Lagoa",
+  "short_name": "VillageOS",
+  "description": "Sistema operacional da vila: coordenação, provas, economia Infinitos e IA da Vila.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a1420",
+  "theme_color": "#0a1420",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
