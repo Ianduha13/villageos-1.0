@@ -1,4 +1,8 @@
+import Link from "next/link";
 import { getCurrentPerson } from "@/lib/auth";
+import { getDb } from "@/db/client";
+import { ensureArena } from "@/lib/onboarding";
+import { computeMetrics } from "@/lib/metrics";
 
 // Reads the session + person from the DB — render per request.
 export const dynamic = "force-dynamic";
@@ -12,6 +16,9 @@ export const dynamic = "force-dynamic";
 export default async function VilaAgoraPage() {
   const person = await getCurrentPerson();
   const handle = person?.handle ?? "villager";
+  const db = getDb();
+  const arena = await ensureArena(db);
+  const metrics = await computeMetrics(db, arena.id);
 
   return (
     <div className="space-y-6">
@@ -40,14 +47,64 @@ export default async function VilaAgoraPage() {
         </div>
       </div>
 
-      <section className="glass-card p-5">
-        <h2 className="mb-4 text-lg font-semibold">Resumo da vila</h2>
-        <p className="text-sm text-text-secondary">
-          Olá, <span className="text-accent-cyan">@{handle}</span>. A vila ainda
-          está em silêncio — as ações da comunidade aparecerão aqui assim que
-          começarem a acontecer.
-        </p>
+      <section className="glass-card space-y-4 p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Resumo da vila</h2>
+          <span className="text-xs text-text-secondary">
+            Olá, <span className="text-accent-cyan">@{handle}</span>
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Stat label="Ações" value={metrics.claimCount} />
+          <Stat label="Provas" value={metrics.proofCount} />
+          <Stat label="Insights IA" value={metrics.insightCount} />
+          <Stat label="Decisões" value={metrics.decisionCount} />
+        </div>
+
+        <div className="rounded-card border border-hairline bg-surface-2 p-4 text-center">
+          <div className="text-xs text-text-secondary">Return on Aliveness</div>
+          <div className="text-3xl font-extrabold text-accent-green">
+            {metrics.returnOnAliveness ?? "—"}
+            {metrics.returnOnAliveness !== null ? (
+              <span className="text-base text-text-secondary">/100</span>
+            ) : null}
+          </div>
+          <div className="mt-1 text-[11px] text-text-secondary">
+            Índice de capacidade de coordenação (CCI-v0)
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 text-sm">
+          <Link
+            href="/vila"
+            className="rounded-pill border border-hairline bg-surface-2 px-4 py-2 text-accent-cyan"
+          >
+            Ver ações ›
+          </Link>
+          <a
+            href="/export?format=json"
+            className="rounded-pill border border-hairline bg-surface-2 px-4 py-2"
+          >
+            Exportar JSON
+          </a>
+          <a
+            href="/export?format=csv"
+            className="rounded-pill border border-hairline bg-surface-2 px-4 py-2"
+          >
+            Exportar CSV
+          </a>
+        </div>
       </section>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-card border border-hairline bg-surface-2 p-3 text-center">
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-xs text-text-secondary">{label}</div>
     </div>
   );
 }

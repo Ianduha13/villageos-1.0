@@ -12,10 +12,12 @@ import {
   REVIEW_STATUS_LABELS,
   type InsightType,
 } from "@/lib/steward";
+import { getDecisionForClaim } from "@/lib/decisions";
 import {
   attachProofAction,
   analyzeClaimAction,
   reviewInsightAction,
+  recordDecisionAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +40,7 @@ export default async function ClaimDetailPage({
   const proofTypes = Object.keys(PROOF_TYPE_LABELS) as ProofType[];
   const insights = await listInsightsForClaim(db, claim.id);
   const insightTypes = Object.keys(INSIGHT_TYPE_LABELS) as InsightType[];
+  const decision = await getDecisionForClaim(db, claim.id);
 
   return (
     <div className="space-y-6">
@@ -216,9 +219,40 @@ export default async function ClaimDetailPage({
 
       <section className="glass-card p-5">
         <h2 className="mb-2 text-lg font-semibold">Decisão</h2>
-        <p className="text-sm text-text-secondary">
-          A comunidade registra a decisão. (em breve)
-        </p>
+        {decision ? (
+          <div className="rounded-card border border-hairline bg-surface-2 p-3 text-sm">
+            <p className="mb-1 font-medium text-accent-green">
+              {decision.decision}
+            </p>
+            {decision.rationale ? (
+              <p className="text-text-secondary">{decision.rationale}</p>
+            ) : null}
+          </div>
+        ) : (
+          <form action={recordDecisionAction} className="space-y-3">
+            <p className="text-xs text-text-secondary">
+              A comunidade decide — não a IA.
+            </p>
+            <input type="hidden" name="claimId" value={claim.id} />
+            <input
+              name="decision"
+              required
+              placeholder="A decisão da comunidade…"
+              className="w-full rounded-card border border-hairline bg-surface-2 px-3 py-2 text-sm outline-none focus:border-accent-cyan"
+            />
+            <input
+              name="rationale"
+              placeholder="Justificativa (opcional)"
+              className="w-full rounded-card border border-hairline bg-surface-2 px-3 py-2 text-sm outline-none focus:border-accent-cyan"
+            />
+            <button
+              type="submit"
+              className="w-full rounded-pill bg-brand-gradient px-5 py-3 text-sm font-semibold text-bg-deep shadow-glow-cyan"
+            >
+              Registrar decisão
+            </button>
+          </form>
+        )}
       </section>
     </div>
   );

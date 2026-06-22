@@ -252,3 +252,24 @@ export const aiInsights = pgTable("ai_insights", {
 
 export type AiInsight = typeof aiInsights.$inferSelect;
 export type NewAiInsight = typeof aiInsights.$inferInsert;
+
+/*
+ * --- Phase D: Decisions ----------------------------------------------------
+ * A human-recorded collective decision on a claim (the AI never writes here).
+ * Recording one moves the claim to `decided` and appends decision.created.
+ */
+export const decisions = pgTable("decisions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  claimId: uuid("claim_id")
+    .notNull()
+    .references(() => claims.id),
+  decidedBy: uuid("decided_by").references(() => persons.id),
+  decision: text("decision").notNull(),
+  rationale: text("rationale"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export type Decision = typeof decisions.$inferSelect;
+export type NewDecision = typeof decisions.$inferInsert;

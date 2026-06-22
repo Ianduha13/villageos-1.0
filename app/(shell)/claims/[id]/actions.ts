@@ -12,6 +12,7 @@ import {
   type InsightType,
   type ReviewStatus,
 } from "@/lib/steward";
+import { recordDecision } from "@/lib/decisions";
 
 /*
  * Claim-detail server actions. attachProofAction takes either a link/text uri or
@@ -68,5 +69,23 @@ export async function reviewInsightAction(formData: FormData): Promise<void> {
   if (!insightId || !status) throw new Error("Parâmetros inválidos");
   const actorId = await getSessionPersonId();
   await reviewInsight(db, { insightId, status, actorId });
+  revalidatePath(`/claims/${claimId}`);
+}
+
+export async function recordDecisionAction(formData: FormData): Promise<void> {
+  const db = getDb();
+  const claimId = String(formData.get("claimId") ?? "");
+  const decision = String(formData.get("decision") ?? "").trim();
+  const rationale = String(formData.get("rationale") ?? "").trim();
+  if (!claimId || !decision) throw new Error("Decisão obrigatória");
+  const arena = await ensureArena(db);
+  const decidedBy = await getSessionPersonId();
+  await recordDecision(db, {
+    claimId,
+    arenaId: arena.id,
+    decision,
+    rationale: rationale || undefined,
+    decidedBy,
+  });
   revalidatePath(`/claims/${claimId}`);
 }
