@@ -179,3 +179,36 @@ export const claims = pgTable("claims", {
 
 export type Claim = typeof claims.$inferSelect;
 export type NewClaim = typeof claims.$inferInsert;
+
+/*
+ * --- Phase B: Proofs -------------------------------------------------------
+ * Evidence attached to a claim (thesis: Claim → Proof). The binary artifact
+ * lives in object storage / filesystem; `uri` references it. Attaching appends
+ * proof.attached (and may move the claim to under_review).
+ */
+export const proofType = pgEnum("proof_type", [
+  "image",
+  "document",
+  "link",
+  "observation",
+  "measurement",
+  "testimony",
+  "other",
+]);
+
+export const proofs = pgTable("proofs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  claimId: uuid("claim_id")
+    .notNull()
+    .references(() => claims.id),
+  proofType: proofType("proof_type").notNull().default("link"),
+  uri: text("uri").notNull(),
+  description: text("description"),
+  validatorId: uuid("validator_id").references(() => persons.id),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export type Proof = typeof proofs.$inferSelect;
+export type NewProof = typeof proofs.$inferInsert;
