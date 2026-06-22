@@ -138,3 +138,44 @@ export type Invite = typeof invites.$inferSelect;
 export type NewInvite = typeof invites.$inferInsert;
 export type EventRow = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
+
+/*
+ * --- Phase A: Claims -------------------------------------------------------
+ * A claim is a structured statement about reality (thesis: Observation →
+ * Claim). It rides the same Arena + Reality Ledger spine; creating or moving a
+ * claim appends claim.created / claim.status_changed to `events`.
+ */
+export const claimType = pgEnum("claim_type", [
+  "observation",
+  "need",
+  "proposal",
+  "risk",
+  "decision_request",
+]);
+
+export const claimStatus = pgEnum("claim_status", [
+  "open",
+  "needs_proof",
+  "under_review",
+  "verified",
+  "decided",
+  "archived",
+]);
+
+export const claims = pgTable("claims", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  arenaId: uuid("arena_id")
+    .notNull()
+    .references(() => arenas.id),
+  authorId: uuid("author_id").references(() => persons.id),
+  title: text("title").notNull(),
+  statement: text("statement"),
+  type: claimType("type").notNull().default("observation"),
+  status: claimStatus("status").notNull().default("open"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export type Claim = typeof claims.$inferSelect;
+export type NewClaim = typeof claims.$inferInsert;
