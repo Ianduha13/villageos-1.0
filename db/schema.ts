@@ -212,3 +212,43 @@ export const proofs = pgTable("proofs", {
 
 export type Proof = typeof proofs.$inferSelect;
 export type NewProof = typeof proofs.$inferInsert;
+
+/*
+ * --- Phase C: AI insights (IA da Vila) -------------------------------------
+ * Advisory AI output on a claim. The AI never decides: insights enter `pending`
+ * and carry full provenance (model_provider / model_name / prompt_version).
+ * Adds ai_insight.created / ai_insight.reviewed to the ledger.
+ */
+export const insightType = pgEnum("insight_type", [
+  "claim_summary",
+  "missing_proofs",
+  "next_action",
+]);
+
+export const humanReviewStatus = pgEnum("human_review_status", [
+  "pending",
+  "accepted",
+  "rejected",
+  "edited",
+]);
+
+export const aiInsights = pgTable("ai_insights", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  claimId: uuid("claim_id")
+    .notNull()
+    .references(() => claims.id),
+  insightType: insightType("insight_type").notNull(),
+  content: text("content").notNull(),
+  modelProvider: text("model_provider").notNull(),
+  modelName: text("model_name").notNull(),
+  promptVersion: text("prompt_version").notNull(),
+  humanReviewStatus: humanReviewStatus("human_review_status")
+    .notNull()
+    .default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export type AiInsight = typeof aiInsights.$inferSelect;
+export type NewAiInsight = typeof aiInsights.$inferInsert;

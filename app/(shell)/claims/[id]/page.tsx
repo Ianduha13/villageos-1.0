@@ -6,7 +6,17 @@ import {
   CLAIM_STATUS_LABELS,
 } from "@/lib/claims";
 import { listProofsForClaim, PROOF_TYPE_LABELS, type ProofType } from "@/lib/proofs";
-import { attachProofAction } from "./actions";
+import {
+  listInsightsForClaim,
+  INSIGHT_TYPE_LABELS,
+  REVIEW_STATUS_LABELS,
+  type InsightType,
+} from "@/lib/steward";
+import {
+  attachProofAction,
+  analyzeClaimAction,
+  reviewInsightAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +36,8 @@ export default async function ClaimDetailPage({
 
   const proofs = await listProofsForClaim(db, claim.id);
   const proofTypes = Object.keys(PROOF_TYPE_LABELS) as ProofType[];
+  const insights = await listInsightsForClaim(db, claim.id);
+  const insightTypes = Object.keys(INSIGHT_TYPE_LABELS) as InsightType[];
 
   return (
     <div className="space-y-6">
@@ -126,11 +138,80 @@ export default async function ClaimDetailPage({
       </section>
 
       <section className="glass-card p-5">
-        <h2 className="mb-2 text-lg font-semibold">IA da Vila</h2>
-        <p className="text-sm text-text-secondary">
-          A IA da Vila pode resumir e sugerir o que falta — sempre como conselho,
-          nunca decidindo. (em breve)
+        <h2 className="mb-1 text-lg font-semibold">IA da Vila</h2>
+        <p className="mb-3 text-xs text-text-secondary">
+          Conselho da IA — a comunidade decide. Cada insight fica pendente até a
+          revisão humana.
         </p>
+
+        {insights.length > 0 ? (
+          <ul className="mb-4 space-y-2">
+            {insights.map((ins) => (
+              <li
+                key={ins.id}
+                className="rounded-card border border-hairline bg-surface-2 p-3 text-sm"
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="rounded-pill border border-hairline px-2 py-0.5 text-xs text-accent-purple">
+                    {INSIGHT_TYPE_LABELS[ins.insightType]}
+                  </span>
+                  <span className="text-xs text-text-secondary">
+                    {REVIEW_STATUS_LABELS[ins.humanReviewStatus]}
+                  </span>
+                </div>
+                <p className="mb-2">{ins.content}</p>
+                <p className="mb-2 text-[11px] text-text-secondary">
+                  {ins.modelProvider}/{ins.modelName} · prompt {ins.promptVersion}
+                </p>
+                {ins.humanReviewStatus === "pending" ? (
+                  <div className="flex gap-2">
+                    <form action={reviewInsightAction}>
+                      <input type="hidden" name="insightId" value={ins.id} />
+                      <input type="hidden" name="claimId" value={claim.id} />
+                      <input type="hidden" name="status" value="accepted" />
+                      <button className="rounded-pill border border-hairline px-3 py-1 text-xs text-accent-green">
+                        Aceitar
+                      </button>
+                    </form>
+                    <form action={reviewInsightAction}>
+                      <input type="hidden" name="insightId" value={ins.id} />
+                      <input type="hidden" name="claimId" value={claim.id} />
+                      <input type="hidden" name="status" value="rejected" />
+                      <button className="rounded-pill border border-hairline px-3 py-1 text-xs text-text-secondary">
+                        Rejeitar
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mb-4 text-sm text-text-secondary">
+            Nenhum conselho ainda. Peça uma análise à IA da Vila.
+          </p>
+        )}
+
+        <form action={analyzeClaimAction} className="flex gap-2">
+          <input type="hidden" name="claimId" value={claim.id} />
+          <select
+            name="insightType"
+            defaultValue="claim_summary"
+            className="flex-1 rounded-card border border-hairline bg-surface-2 px-3 py-2 text-sm outline-none focus:border-accent-cyan"
+          >
+            {insightTypes.map((t) => (
+              <option key={t} value={t}>
+                {INSIGHT_TYPE_LABELS[t]}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-pill bg-brand-gradient px-5 py-2 text-sm font-semibold text-bg-deep shadow-glow-cyan"
+          >
+            Analisar
+          </button>
+        </form>
       </section>
 
       <section className="glass-card p-5">

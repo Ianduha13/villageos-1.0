@@ -6,6 +6,12 @@ import { getSessionPersonId } from "@/lib/auth";
 import { ensureArena } from "@/lib/onboarding";
 import { attachProof, type ProofType } from "@/lib/proofs";
 import { getArtifactStore } from "@/lib/storage";
+import {
+  analyzeClaim,
+  reviewInsight,
+  type InsightType,
+  type ReviewStatus,
+} from "@/lib/steward";
 
 /*
  * Claim-detail server actions. attachProofAction takes either a link/text uri or
@@ -39,5 +45,28 @@ export async function attachProofAction(formData: FormData): Promise<void> {
     validatorId,
   });
 
+  revalidatePath(`/claims/${claimId}`);
+}
+
+export async function analyzeClaimAction(formData: FormData): Promise<void> {
+  const db = getDb();
+  const claimId = String(formData.get("claimId") ?? "");
+  const insightType = String(
+    formData.get("insightType") ?? "claim_summary",
+  ) as InsightType;
+  if (!claimId) throw new Error("claimId obrigatório");
+  const actorId = await getSessionPersonId();
+  await analyzeClaim(db, { claimId, insightType, actorId });
+  revalidatePath(`/claims/${claimId}`);
+}
+
+export async function reviewInsightAction(formData: FormData): Promise<void> {
+  const db = getDb();
+  const insightId = String(formData.get("insightId") ?? "");
+  const claimId = String(formData.get("claimId") ?? "");
+  const status = String(formData.get("status") ?? "") as ReviewStatus;
+  if (!insightId || !status) throw new Error("Parâmetros inválidos");
+  const actorId = await getSessionPersonId();
+  await reviewInsight(db, { insightId, status, actorId });
   revalidatePath(`/claims/${claimId}`);
 }
